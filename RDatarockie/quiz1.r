@@ -18,5 +18,4 @@ birthday <- function(bornyear){
   return(age)
 }
 ag <- birthday(1997)
-ag
 

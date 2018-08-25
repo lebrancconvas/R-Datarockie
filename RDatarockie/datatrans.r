@@ -43,3 +43,15 @@ result <- df %>%
 
 write.csv(result,'wakuwaku.csv')
 dir()
+
+#Search Pattern
+#pattern is for the word that begin with
+#what dataset
+#value = T is for displaying result by show values in dataset
+grep(pattern = 'New', state.name, value = T)
+
+index <- grepl('New',state.name)
+state.name[index]
+
+
+
