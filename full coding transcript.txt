@@ -1,0 +1,362 @@
+##################################################
+############ CHAPTER 1 - Intro to R ##############
+##################################################
+
+# create new project
+# get working directory
+getwd() 
+dir()
+
+# you can also set working directory
+setwd("path to folder on your desktop")
+
+# assign variable, we use <- to assign variable
+income <- 1000
+food_expense <- 500
+left_over <- income - food_expense
+
+# data types & data structures
+# vector
+numeric_vector <- 1:10
+numeric_vector <- c(1,2,5,7,10,15)
+logical_vector <- c(TRUE, FALSE, TRUE)
+logical_vector <- c(T, F, T) # shorhand for TRUE, FALSE
+character_vector <- c("toy", "ball", "ozil", "tiger")
+
+# create factor
+animals <- c("dog", "dog", "cat")
+animals <- factor(animals) # easy !!!
+
+# create list
+my_list <- list(x, y, z) # x y z can be any object
+
+# create matrix
+my_mat <- matrix(1:9, ncol=3, byrow=TRUE)
+
+# create dataframe
+names <- c("toy", "ball", "tiger")
+ages <- c(29, 25, 24)
+employed <- c(T, T, F)
+my_df <- data.frame(names, ages, employed)
+print(my_df) # see your my_df dataframe
+
+# subset - get data you want from data structures
+# by position
+x <- 1:10
+x[1]
+x[c(1,3)]
+c[1:3]
+
+# by condition
+x[x > 5]
+x[x <= 3]
+
+# by name
+names(x) <- c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
+x["A"]
+x[c("A", "H", "J")]
+
+# subset dataframe
+mtcars
+mtcars[1:10, ] # get rows 1-10, all columns
+mtcars[ , 1:5] # get all rows, columns 1-5
+mtcars[3, 10] # get row 3, column 10
+
+##################################################
+############ CHAPTER 2 - DataFrame ###############
+##################################################
+
+# Install 'ONE PACKAGE TO RULE THEM ALL'
+install.packages("tidyverse") 
+library(tidyverse) # use this library() everytime you open R
+
+# read data into R
+mtcars <- read.csv("mtcars.csv") # make sure this file in working directory
+
+# write data out of R
+write.csv(mtcars, "mtcars.csv") # this will save .csv file in working directory
+
+# review structure
+glimpse(mtcars) 
+summary(mtcars) # basic summary of each column in your df
+head(mtcars) # print first six rows
+tail(mtcars) # print last six rows
+
+# basic statistics
+# we use $ to select a column in dataframe
+mean(mtcars$mpg)
+median(mtcars$mpg)
+sum(mtcars$am)
+sd(mtcars$mpg) # standard deviation
+var(mtcars$mpg) # variance
+table(mtcars$am) # table 1-way
+table(mtcars$am, mtcars$gear) # table 2-way (CROSSTABS)
+
+# missing values
+complete.cases(mtcars) # check if any row has missing values (NA)
+mean(complete.cases(mtcars)) # % of complete data
+1 - mean(complete.cases(mtcars)) # % of incomplete data
+
+# remove all rows with na
+clean_msleep <- drop_na(msleep)
+
+# plot missing value
+install.packages("DataExplorer")
+library(DataExplorer)
+plot_missing(msleep) # plot missing value, very convenient !!
+
+# imputation
+replace_na(msleep$sleep_rem, 1.85) # replace NA in sleep_rem column with 1.85
+
+##################################################
+############ CHAPTER 3 - FUNCTION ################
+##################################################
+
+# function to sum two numbers
+function_name <- function(a, b) {
+	total = a + b
+	print(total)
+}
+
+# what we practice in class
+roll_dices <- function() {
+	# roll two dices, get sum scores
+	die1 = sample(1:6, 1)
+	die2 = sample(1:6, 1)
+	total = die1 + die2
+	print(total)
+
+	# if sum two dices >= 10, you WIN the game
+	output = ifelse(total >= 10, "W", "L")
+	print(output)
+}
+
+# sample function
+sample(1:100, 3) # randomly select 3 numbers from vector 1:100
+
+# ifelse function
+# ifelse('condition', TRUE, FALSE)
+x <- 1:10
+ifelse(x >= 5, 'More than or equal to five', 'Less than five')
+
+##################################################
+##### CHAPTER 4 - DATA TRANSFORMATION ############
+##################################################
+
+library(tidyverse)
+
+# select columns
+select(mtcars, wt, mpg, hp) # first argument is dataframe
+select(mtcars, 1:5)
+select(mtcars, starts_with("a"))
+select(mtcars, ends_with("a"))
+select(mtcars, contains("a"))
+
+# filter rows
+filter(mtcars, hp >= 100)
+filter(mtcars, hp >= 100 & am == 1) # AND
+filter(mtcars, wt >= 3 | hp <= 100) # OR
+filter(mtcars, hp %in% 100:150) # BETWEEN
+filter(mtcars, gear %in% c(3,5)) # in 3 OR 5
+
+# arrange
+arrange(mtcars, hp) # ascending order (low-high)
+arrange(mrcars, -hp) # descending order (high-low)
+
+# mutate - crate new columns
+mutate(mtcars,  hp_power = hp**2,
+				hp_divided = hp/2,
+				hp_add_100 = hp+100,
+				hp_log = log(hp))
+
+# summarise statistics
+# we can use group_by to group data before doing summarise
+summarise(mtcars,   avg_hp = mean(hp),
+					sum_hp = sum(hp),
+					sd_hp = sd(hp),
+					max_hp = max(hp),
+					min_hp = min(hp),
+					n = n())
+
+# pipe operator
+mtcars %>%
+	select(hp, wt, mpg) %>%
+	filter(hp >= 150) %>%
+	group_by(am) %>%
+	summarise(avg_hp = mean(hp),
+			  sd_hp = sd(hp),
+			  n = n())
+
+# case study - NEW YORK FLIGHTS 2013
+install.packages("nycflights13")
+library(nycflights13)
+glimpse(flights)
+
+# get top 10 carriers in September 2013
+flights %>%
+	filter(month == 9) %>%
+	group_by(carrier) %>%
+	summarise(n = n()) %>%
+	arrange(-n) %>%
+	head(10)
+
+# alternative solution - get the same answer
+flights %>%
+	filter(month == 9) %>%
+	count(carrier) %>%
+	arrange(-n) %>%
+	head(10)
+
+# joins (inner_join & lef_join are the most common)
+top_ten_carriers <- flights %>%
+						filter(month == 9) %>%
+						count(carrier) %>%
+						arrange(-n) %>%
+						head(10)
+
+left_join(top_ten_carriers, airlines, by = "carrier")
+
+# if column names in two tables are different, use this one
+left_join(top_ten_carriers, airlines, by = c("carrier" = "carrier"))
+
+##################################################
+####### CHAPTER 5 - DATA VISUALIZTION ############
+##################################################
+
+library(tidyverse)
+
+# basic scatter plot
+ggplot(data = mtcars, mapping = aes(x = wt, y = mpg)) +
+	geom_point()
+
+# basic histogram
+ggplot(mtcars, aes(hp)) + 
+	geom_histogram()
+
+# basic boxplot
+ggplot(mtcars, aes(factor(am), hp)) +
+	geom_boxplot()
+
+# scatter plot + smooth
+glimpse(diamonds)
+ggplot(diamonds, aes(carat, price)) +
+	geom_point() +
+	geom_smooth()
+
+# add more layers
+ggplot(diamonds, aes(carat, price)) +
+	geom_point() +
+	geom_smooth() +
+	theme_minimal() +
+	labs(title = "scatter plot of carat x price",
+		 x = "carat diamonds",
+		 y = "price diamonds")
+
+# setting vs. mapping
+# mapping always in aes() function !!
+# setting outside the aes() function !!
+
+# setting example
+ggplot(data = mtcars, mapping = aes(x = wt, y = mpg)) +
+	geom_point(size = 2, alpha = 0.5, col = "red")
+
+# color in R
+colors() # to see color name in R / you can use # hex color too
+
+# mapping example
+ggplot(data = diamonds, mapping = aes(x = carat, y = price, col = cut)) +
+	geom_point()
+
+# FACET
+ggplot(diamonds, aes(carat, price)) +
+	geom_point() + 
+	facet_wrap(~cut, ncol=3) # one variable
+
+ggplot(diamonds, aes(carat, price)) +
+	geom_point() +
+	facet_grid(cut ~ clarity) # two variable make a GRID
+
+##################################################
+########### CHAPTER 5.1 - LINEAR REGRESSION ######
+##################################################
+
+## three steps to build a model 
+## 1. split data into training and test set, 70:30 or 80:20 
+## 2. train model using training data
+## 3. test model using testing data
+
+## linear regression
+## we use BOSTON dataset from MASS package
+
+install.packages("MASS")
+library(MASS)
+glimpse(Boston)
+
+## 1. SPLIT DATA
+set.seed(1)
+total_n <- nrow(Boston)
+id <- sample(1:total_n, 0.7*total_n)
+train_data <- Boston[id, ]
+test_data <- Boston[-id, ]
+
+## 2. TRAIN MODEL
+linear_reg <- lm(medv ~ crim + tax + black, data = train_data)
+print(linear_reg) # see the coefficients
+summary(linear_reg) # see full details of the model
+
+## 3. TEST MODEL
+predictions <- predict(linear_reg, test_data)
+
+## Evaluate the model using RMSE
+## Root Mean Square Error
+## Read this https://en.wikipedia.org/wiki/Root-mean-square_deviation
+## We want this RMSE to be lowest as possible
+rmse <- sqrt(mean((predictions - test_data$medv)**2))
+print(rmse)
+
+## full model using all X's in the dataframe
+linear_reg <- lm(medv ~ ., data = train_data)
+
+##################################################
+########### CHAPTER 5.2 - NEURAL NETWORK #########
+##################################################
+
+## neural network - one hidden layer (the most basic architecture)
+install.packages("nnet")
+install.packages("NeuralNetTools")
+library(nnet)
+library(NeuralNetTools)
+
+## iris dataset (very popular for ML problem)
+## iris is CLASSIFICATION problem
+glimpse(iris)
+
+## 1. SPLIT DATA
+set.seed(1)
+total_n <- nrow(iris)
+id <- sample(1:total_n, 0.7*total_n)
+train_data <- iris[id, ]
+test_data <- iris[-id, ]
+
+## 2. TRAIN MODEL
+set.seed(1) # set seed again because nn will randomly create weights/ networks
+nn_model <- nnet(Species ~ ., data = train_data, size = 4) # size of unit in hidden layer
+print(nn_model) # see the coefficients
+summary(nn_model) # see full details of the model
+
+## PLOT MODEL
+plotnet(nn_model)
+
+## 3. TEST MODEL
+## use type="class" for classification problem
+predictions <- predict(nn_model, test_data, type="class")
+
+## Evaluate the model using RMSE
+## confusion matrix <- table(actual, prediction)
+confusion_mat <- table(test_data$Species, predictions)
+accuracy <- sum(diag(confusion_mat)) / sum(confusion_mat)
+print(accuracy)
+
+#########################################################################
+######################### Congratulations ###############################
+######################### DataRockie School #############################
