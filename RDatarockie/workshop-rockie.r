@@ -26,3 +26,13 @@ y <- c("Hello","World")
 class(y)
 z <- c(TRUE,FALSE,T,F)
 print(z)
+#factor
+animals <- c("Dog","Cat","Cat","Pegasus")
+class(animals)
+#covert character type to factor type
+animals <- factor(animals)
+print(animals)
+#display in table mode
+table(animals)
+#display in table mode with percentage
+print(table(animals)/length(animals))
