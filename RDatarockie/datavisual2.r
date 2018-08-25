@@ -47,10 +47,19 @@ ggplot(df2,aes(carat,price,color=cut)) + geom_point(alpha=0.2)
 
 ggplot(df2,aes(carat,price,color=cut)) + geom_point(alpha=0.2) + theme_minimal()
 
-ggplot(df2,aes(carat,price)) + 
+ggplot(df2,aes(carat,price,color=cut)) + 
   geom_point() +
   theme_minimal() +
-  facet_wrap(~cut)
+  facet_wrap(~cut,ncol=2)
+
+table(df2$cut)
+
+ggplot(df2,aes(carat,price,color=cut)) + 
+  geom_point() +
+  theme_minimal() +
+  facet_wrap(~cut,ncol=2) +
+  scale_color_manual(values=c("red","green","blue","gold","salmon"))
+
 
 
 
